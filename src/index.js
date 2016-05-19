@@ -28,7 +28,7 @@ var Application = function(busIP, spicePassword) {
     this.spicePassword = spicePassword || uuid.v4();
 };
 
-Application.prototype.launch = function(appInfo, callback, exchangeCreation) {
+Application.prototype.launch = function(appInfo, callback) {
 
     // Validate appInfo: { name: 'name', user: 'user', card: 'card', signature: 'signature', email_domain: 'email_domain'}
     // Optional properties: pretty_name. It defaults to user if not found.
@@ -111,46 +111,38 @@ Application.prototype.launch = function(appInfo, callback, exchangeCreation) {
 
             }.bind(self));
         }.bind(self));
-    }, exchangeCreation);
+    });
 };
 
 //Generate and declare exchange for busSuscription
-Application.prototype.prepareSubscription = function(appInfo, callback, exchangeCreation) {
+Application.prototype.prepareSubscription = function(appInfo, callback) {
     var exchange = 'user_' + appInfo.user + '@' + appInfo.domain + '_app_' + uuid.v4();
-
-    if (exchangeCreation) {
-        var busSubscription = '/exchange/' + exchange + '/' + exchange;
-        var connection = new amqp.Connection({
-            host: appInfo.amqpBusHost,
-            port: appInfo.amqpBusPort,
-            login: appInfo.amqpBusUser,
-            password: appInfo.amqpBusPass
-        });
-        connection.connect(function(err) {
-            if (err) {
-                console.error('Connection error: ', err);
-                return callback(err);
-            }
-            console.log('AMQP Connection established');
-            connection.declareExchange(exchange, {type:'topic', autoDelete:true}, function(err) {
-                connection.disconnect(function() {
-                    console.log('Connection to bus disconnected.');
-                });
-                if (err) {
-                    console.error('Error creating exchange: ', err);
-                    return callback(err);
-                } else {
-                    console.log('Exchange created.');
-                    return callback(null, busSubscription);
-                }
+    var busSubscription = '/exchange/' + exchange + '/' + exchange;
+    var connection = new amqp.Connection({
+        host: appInfo.amqpBusHost,
+        port: appInfo.amqpBusPort,
+        login: appInfo.amqpBusUser,
+        password: appInfo.amqpBusPass
+    });
+    connection.connect(function(err) {
+        if (err) {
+            console.error('Connection error: ', err);
+            return callback(err);
+        }
+        console.log('AMQP Connection established');
+        connection.declareExchange(exchange, {type:'topic', autoDelete:true}, function(err) {
+            connection.disconnect(function() {
+                console.log('Connection to bus disconnected.');
             });
+            if (err) {
+                console.error('Error creating exchange: ', err);
+                return callback(err);
+            } else {
+                console.log('Exchange created.');
+                return callback(null, busSubscription);
+            }
         });
-    } else {
-        var busSubscription = '/topic/' + exchange;
-        return callback(null, busSubscription);
-    }
-
-
+    });
 };
 
 // Prepares the 'docker run' command that will launch the required application's container for the user
