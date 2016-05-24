@@ -27,7 +27,16 @@ var settings = {
     images: {
         open365_office: process.env.EYEOS_VIRTUAL_APPLICATION_OPEN365_OFFICE_IMAGE || 'eyeos/open365-office:latest',
         open365_mail: process.env.EYEOS_VIRTUAL_APPLICATION_OPEN365_MAIL_IMAGE || 'eyeos/open365-mail:latest'
-    }
+    },
+    dockerExtraArgs: process.env.OPEN365_DOCKER_EXTRA_ARGS || '[]'
 };
-
+try {
+    settings.dockerExtraArgs = JSON.parse(settings.dockerExtraArgs);
+    if(! Array.isArray(settings.dockerExtraArgs)) {
+        throw new Error("OPEN365_DOCKER_EXTRA_ARGS is valid JSON, but not an array.");
+    }
+} catch(e) {
+    console.log("Error parsing OPEN365_DOCKER_EXTRA_ARGS: Not a valid JSON array");
+    settings.dockerExtraArgs = [];
+}
 module.exports = settings;

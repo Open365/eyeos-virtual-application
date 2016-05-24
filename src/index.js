@@ -222,6 +222,7 @@ Application.prototype.prepareCommand = function(appInfo, busSubscription) {
     ];
     command = command.concat(envVars);
     command = command.concat(mounts);
+    command = command.concat(settings.dockerExtraArgs);
     command.push(dockerImage, 'exec.sh');
 
     return command;
