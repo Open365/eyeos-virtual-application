@@ -199,6 +199,7 @@ Application.prototype.prepareCommand = function(appInfo, busSubscription) {
     envVars.push("-e", "EYEOS_IMAP_HOST=" + appInfo.imap_host);
     envVars.push("-e", "EYEOS_SMTP_HOST=" + appInfo.smtp_host);
     envVars.push("-e", "USE_BIND_MOUNT_FOR_LIBRARIES=" + appInfo.use_bind_mount_for_libraries);
+    envVars.push("-e", "ENABLE_LIBREOFFICE_AUTOSAVE=" + appInfo.enable_libreoffice_autosave);
     envVars.push("-e", "WEBDAV_HOST=" + (appInfo.webDAVHost || this.busIP));
     envVars.push("-e", "SPICE_RES=" + spiceRes);
     envVars.push("-e", "EYEOS_BUS_MASTER_USER=" + appInfo.minicard);
@@ -222,6 +223,7 @@ Application.prototype.prepareCommand = function(appInfo, busSubscription) {
     ];
     command = command.concat(envVars);
     command = command.concat(mounts);
+    command = command.concat(settings.dockerExtraArgs);
     command.push(dockerImage, 'exec.sh');
 
     return command;
