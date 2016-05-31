@@ -28,7 +28,8 @@ var settings = {
         open365_office: process.env.EYEOS_VIRTUAL_APPLICATION_OPEN365_OFFICE_IMAGE || 'eyeos/open365-office:latest',
         open365_mail: process.env.EYEOS_VIRTUAL_APPLICATION_OPEN365_MAIL_IMAGE || 'eyeos/open365-mail:latest'
     },
-    dockerExtraArgs: process.env.OPEN365_DOCKER_EXTRA_ARGS || '[]'
+    dockerExtraArgs: process.env.OPEN365_DOCKER_EXTRA_ARGS || '[]',
+    dockerVersion: process.env.DOCKER_VERSION
 };
 try {
     settings.dockerExtraArgs = JSON.parse(settings.dockerExtraArgs);

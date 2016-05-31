@@ -22,10 +22,26 @@ var uuid = require('node-uuid');
 var settings = require('../settings.js');
 var amqp = require('eyeos-amqp');
 var url = require('url');
+var fs = require('fs');
 
 var Application = function(busIP, spicePassword) {
     this.busIP = busIP;
     this.spicePassword = spicePassword || uuid.v4();
+    var self = this;
+    this.setDockerBin(function(dockerBin) {
+        self.dockerBin = dockerBin;
+    });
+};
+
+Application.prototype.setDockerBin = function(callback) {
+
+    var dockerBin = 'docker';
+    fs.stat('/usr/local/bin/'+dockerBin+'-'+settings.dockerVersion, function(err, stats){
+        if (!err) {
+            dockerBin += '-' + settings.dockerVersion;
+        }
+        callback(dockerBin);
+    });
 };
 
 Application.prototype.launch = function(appInfo, callback) {
@@ -70,7 +86,7 @@ Application.prototype.launch = function(appInfo, callback) {
                 command += ' DOCKER_TLS_VERIFY=' + appInfo.dockerTLSVerify;
                 command += ' DOCKER_MACHINE_NAME=' + appInfo.dockerMachineName + ' ';
             }
-            command += 'docker port ' + containerID;
+            command += this.dockerBin + ' port ' + containerID;
             console.log("> Docker port command", command);
 
             // Get and return information about the launched container
@@ -212,7 +228,7 @@ Application.prototype.prepareCommand = function(appInfo, busSubscription) {
     var dockerContainerName = user + "_" + app[0] + "_" + uuid.v4();
 
     var command = [
-        'docker', 'run',
+        this.dockerBin, 'run',
         '--name', dockerContainerName,
         '--cap-add=SYS_ADMIN', // mount fuse for webdav
         '--device=/dev/fuse',
