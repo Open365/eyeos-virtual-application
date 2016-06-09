@@ -282,6 +282,11 @@ Application.prototype.selectImage = function(app) {
             dockerImage = settings.images.open365_mail;
             break;
 
+        // Gimp
+        case 'gimp':
+            dockerImage = settings.images.open365_gimp;
+            break;
+        
         default:
             // TODO: Throw an error instead of accepting any application
             // Appservice doesn't support raising an exception inside eyeos-virtual-application

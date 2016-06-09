@@ -26,7 +26,9 @@ var settings = {
     },
     images: {
         open365_office: process.env.EYEOS_VIRTUAL_APPLICATION_OPEN365_OFFICE_IMAGE || 'eyeos/open365-office:latest',
-        open365_mail: process.env.EYEOS_VIRTUAL_APPLICATION_OPEN365_MAIL_IMAGE || 'eyeos/open365-mail:latest'
+        open365_mail: process.env.EYEOS_VIRTUAL_APPLICATION_OPEN365_MAIL_IMAGE || 'eyeos/open365-mail:latest',
+        open365_gimp: process.env.EYEOS_VIRTUAL_APPLICATION_OPEN365_GIMP_IMAGE || 'eyeos/open365-gimp:latest'
+
     },
     dockerExtraArgs: process.env.OPEN365_DOCKER_EXTRA_ARGS || '[]',
     dockerVersion: process.env.DOCKER_VERSION
