@@ -234,6 +234,7 @@ Application.prototype.prepareCommand = function(appInfo, busSubscription) {
         '--device=/dev/fuse',
         '-m="' + settings.resources.max_memory + '"',
         '--memory-swap="' + settings.resources.max_memory + '"',
+        '--label=com.eyeos.container-type=user-application',
         '-d',
         '-P'
     ];
