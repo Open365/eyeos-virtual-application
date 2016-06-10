@@ -282,9 +282,9 @@ Application.prototype.selectImage = function(app) {
             dockerImage = settings.images.open365_mail;
             break;
 
-        // Gimp
-        case 'gimp':
-            dockerImage = settings.images.open365_gimp;
+        // Draw
+        case 'draw':
+            dockerImage = settings.images.open365_draw;
             break;
         
         default:
