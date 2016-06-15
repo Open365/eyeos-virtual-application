@@ -123,6 +123,10 @@ Application.prototype.launch = function(appInfo, callback) {
                     infoToReturn.wsHost = appInfo.wsHost;
                 }
 
+                if (appInfo.wsPort) {
+                    infoToReturn.wsPort = appInfo.wsPort;
+                }
+
                 callback(null, infoToReturn);
 
             }.bind(self));
