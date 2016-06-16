@@ -302,7 +302,7 @@ Application.prototype.selectImage = function(app, tag) {
     if (!tag) {
         tag = 'latest';
     }
-    dockerImage += dockerImage + ":" + tag;
+    dockerImage += ":" + tag;
     console.log("> * docker image: '"+ dockerImage +"'");
 
     return dockerImage;
