@@ -226,7 +226,7 @@ Application.prototype.prepareCommand = function(appInfo, busSubscription) {
     envVars.push("-e", "EYEOS_BUS_MASTER_PASSWD=" + appInfo.minisignature);
 
     // Select the Docker image for this application
-    var dockerImage = this.selectImage(app);
+    var dockerImage = this.selectImage(app, appInfo.tag);
 
     // Create the command with which application's docker will be launched
     var dockerContainerName = user + "_" + app[0] + "_" + uuid.v4();
@@ -261,7 +261,7 @@ Application.prototype.prepareEnvironment = function (appInfo) {
 };
 
 // Selects the appropiate Docker image depending on the application to be executed
-Application.prototype.selectImage = function(app) {
+Application.prototype.selectImage = function(app, tag) {
 
     // Separate COMMAND from PARAMETERS, example ["writter", "file.odt"]
     var command = app[0];
@@ -299,6 +299,10 @@ Application.prototype.selectImage = function(app) {
             dockerImage = settings.images.open365_office;
     }
 
+    if (!tag) {
+        tag = 'latest';
+    }
+    dockerImage += dockerImage + ":" + tag;
     console.log("> * docker image: '"+ dockerImage +"'");
 
     return dockerImage;
