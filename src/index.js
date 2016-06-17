@@ -299,10 +299,11 @@ Application.prototype.selectImage = function(app, tag) {
             dockerImage = settings.images.open365_office;
     }
 
-    if (!tag) {
-        tag = 'latest';
+    if (dockerImage.split(':').length == 1) {
+        tag = tag || 'latest';
+        dockerImage += ":" + tag;
     }
-    dockerImage += ":" + tag;
+
     console.log("> * docker image: '"+ dockerImage +"'");
 
     return dockerImage;
