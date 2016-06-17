@@ -22,10 +22,26 @@ var uuid = require('node-uuid');
 var settings = require('../settings.js');
 var amqp = require('eyeos-amqp');
 var url = require('url');
+var fs = require('fs');
 
 var Application = function(busIP, spicePassword) {
     this.busIP = busIP;
     this.spicePassword = spicePassword || uuid.v4();
+    var self = this;
+    this.setDockerBin(function(dockerBin) {
+        self.dockerBin = dockerBin;
+    });
+};
+
+Application.prototype.setDockerBin = function(callback) {
+
+    var dockerBin = 'docker';
+    fs.stat('/usr/local/bin/'+dockerBin+'-'+settings.dockerVersion, function(err, stats){
+        if (!err) {
+            dockerBin += '-' + settings.dockerVersion;
+        }
+        callback(dockerBin);
+    });
 };
 
 Application.prototype.launch = function(appInfo, callback) {
@@ -70,7 +86,7 @@ Application.prototype.launch = function(appInfo, callback) {
                 command += ' DOCKER_TLS_VERIFY=' + appInfo.dockerTLSVerify;
                 command += ' DOCKER_MACHINE_NAME=' + appInfo.dockerMachineName + ' ';
             }
-            command += 'docker port ' + containerID;
+            command += this.dockerBin + ' port ' + containerID;
             console.log("> Docker port command", command);
 
             // Get and return information about the launched container
@@ -105,6 +121,10 @@ Application.prototype.launch = function(appInfo, callback) {
 
                 if (appInfo.wsHost) {
                     infoToReturn.wsHost = appInfo.wsHost;
+                }
+
+                if (appInfo.wsPort) {
+                    infoToReturn.wsPort = appInfo.wsPort;
                 }
 
                 callback(null, infoToReturn);
@@ -206,18 +226,19 @@ Application.prototype.prepareCommand = function(appInfo, busSubscription) {
     envVars.push("-e", "EYEOS_BUS_MASTER_PASSWD=" + appInfo.minisignature);
 
     // Select the Docker image for this application
-    var dockerImage = this.selectImage(app);
+    var dockerImage = this.selectImage(app, appInfo.tag);
 
     // Create the command with which application's docker will be launched
     var dockerContainerName = user + "_" + app[0] + "_" + uuid.v4();
 
     var command = [
-        'docker', 'run',
+        this.dockerBin, 'run',
         '--name', dockerContainerName,
         '--cap-add=SYS_ADMIN', // mount fuse for webdav
         '--device=/dev/fuse',
         '-m="' + settings.resources.max_memory + '"',
         '--memory-swap="' + settings.resources.max_memory + '"',
+        '--label=com.eyeos.container-type=user-application',
         '-d',
         '-P'
     ];
@@ -240,7 +261,7 @@ Application.prototype.prepareEnvironment = function (appInfo) {
 };
 
 // Selects the appropiate Docker image depending on the application to be executed
-Application.prototype.selectImage = function(app) {
+Application.prototype.selectImage = function(app, tag) {
 
     // Separate COMMAND from PARAMETERS, example ["writter", "file.odt"]
     var command = app[0];
@@ -265,12 +286,22 @@ Application.prototype.selectImage = function(app) {
             dockerImage = settings.images.open365_mail;
             break;
 
+        // Gimp
+        case 'gimp':
+            dockerImage = settings.images.open365_gimp;
+            break;
+        
         default:
             // TODO: Throw an error instead of accepting any application
             // Appservice doesn't support raising an exception inside eyeos-virtual-application
             // without requeuing the messages and I don't want to return 200 OK if we had an error... :(
             console.warn("> Warning: launching default Docker image for required application '"+ command +"'");
             dockerImage = settings.images.open365_office;
+    }
+
+    if (dockerImage.split(':').length == 1) {
+        tag = tag || 'latest';
+        dockerImage += ":" + tag;
     }
 
     console.log("> * docker image: '"+ dockerImage +"'");
